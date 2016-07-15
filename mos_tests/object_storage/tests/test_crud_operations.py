@@ -266,3 +266,10 @@ class TestObjectStorageSWIFT(TestBase):
         ls_in_out = os_swift_client.object_list(bname)
         assert any(f_path == x['Name'] for x in ls_in_out)
         assert any(self.f_size_bytes == x['Bytes'] for x in ls_in_out)
+
+
+# *******************************NORMAL CODE********************************* #
+
+def test_container_delete(container, swift_steps):
+    """Verify that container is deleted."""
+    swift_steps.container_delete(container.name)

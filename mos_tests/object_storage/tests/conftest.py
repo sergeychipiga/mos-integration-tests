@@ -17,12 +17,16 @@ import ntpath
 import os
 import random
 import tempfile
+import uuid
 
 import pytest
+from attrdict import AttrDict
 from six.moves import configparser
 from swiftclient import client
 
 from mos_tests.functions import os_cli
+
+from ..steps import SwiftSteps
 
 logger = logging.getLogger(__name__)
 
@@ -246,3 +250,59 @@ def swift_client(os_conn):
                              key=os_conn.session.auth.password,
                              tenant_name=os_conn.session.auth.tenant_name,
                              auth_version='2')
+
+
+# *******************************NORMAL CODE********************************* #
+
+@pytest.fixture
+def swift_steps(os_swift_client):
+    """Fixture to get swift steps."""
+    return SwiftSteps(os_swift_client)
+
+
+@pytest.yield_fixture
+def create_container(swift_steps):
+    """Callable fixture to create container with options."""
+    containers = []
+
+    def _create_container(container_name):
+        swift_steps.container_create(container_name)
+        container = AttrDict(name=container_name)
+        containers.append(container)
+        return container
+
+    yield _create_container
+
+    for container in containers:
+        if swift_steps.is_container_present(container.name):
+            swift_steps.container_delete(container.name)
+
+
+@pytest.fixture
+def container(create_container):
+    """Fixture to create container with default options."""
+    container_name = next(generate_ids('container'))
+    return create_container(container_name)
+
+
+def generate_ids(prefix=None, postfix=None, count=1, length=None):
+    """Generate unique identificators, based on uuid.
+
+    Arguments:
+        - prefix: prefix of uniq ids, default is None.
+        - postfix: postfix of uniq ids, default is None.
+        - count: count of uniq ids, default is 1.
+        - length: length of uniq ids, default is not limited.
+
+    Returns:
+        - generator of uniq ids.
+    """
+    for _ in range(count):
+        uid = str(uuid.uuid4())
+        if prefix:
+            uid = '{}-{}'.format(prefix, uid)
+        if postfix:
+            uid = '{}-{}'.format(uid, postfix)
+        if length:
+            uid = uid[0:length]
+        yield uid
