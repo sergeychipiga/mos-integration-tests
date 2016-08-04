@@ -30,6 +30,10 @@ from mos_tests.functions import file_cache
 from mos_tests.functions import os_cli
 from mos_tests import settings
 
+from .fixtures import *  # noqa
+from .glance.conftest import *  # noqa
+from .neutron.conftest import *  # noqa
+from .nova.conftest import *  # noqa
 
 logger = logging.getLogger(__name__)
 
@@ -112,6 +116,13 @@ def fuel_master_ip(request, env_name, snapshot_name):
     if not fuel_ip:
         fuel_ip = settings.SERVER_ADDRESS
     return fuel_ip
+
+
+@pytest.fixture
+def auth_url(fuel_master_ip):
+    fuel = get_fuel_client(fuel_master_ip)
+    env = fuel.get_last_created_cluster()
+    return 'http://{0}:5000/v2.0/'.format(env.get_primary_controller_ip())
 
 
 def revert_snapshot(env_name, snapshot_name):

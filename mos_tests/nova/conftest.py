@@ -20,6 +20,8 @@ import pytest
 
 from mos_tests.functions import common
 
+from .fixtures import *  # noqa
+
 logger = logging.getLogger(__name__)
 
 
@@ -31,22 +33,6 @@ def network(os_conn, request):
     yield network
     if 'undestructive' in request.node.keywords:
         os_conn.delete_net_subnet_smart(network['network']['id'])
-
-
-@pytest.yield_fixture
-def keypair(os_conn, request):
-    keypair = os_conn.create_key(key_name='instancekey')
-    yield keypair
-    if 'undestructive' in request.node.keywords:
-        os_conn.delete_key(key_name=keypair.name)
-
-
-@pytest.yield_fixture
-def security_group(os_conn, request):
-    sec_group = os_conn.create_sec_group_for_ssh()
-    yield sec_group
-    if 'undestructive' in request.node.keywords:
-        os_conn.delete_security_group(sec_group)
 
 
 def delete_instances(os_conn, instances):

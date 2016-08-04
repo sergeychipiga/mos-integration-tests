@@ -23,6 +23,8 @@ from tempest.lib.cli import base
 from mos_tests.functions import common
 from mos_tests.functions import os_cli
 
+from .fixtures import *  # noqa
+
 
 def wait_for_glance_alive(os_conn):
     common.wait(lambda: len(list(os_conn.glance.images.list())) > 0,
