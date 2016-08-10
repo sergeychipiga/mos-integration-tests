@@ -102,14 +102,17 @@ class ServerSteps(object):
         wait(predicate, timeout_seconds=timeout)
 
     def check_ssh_connect(self, server, keypair, username=None, password=None,
-                          ssh_timeout=60, timeout=0):
+                          ip=None, proxy_cmd=None, ssh_timeout=60, timeout=0):
         """Verify step to check ssh connect to server."""
-        floating_ips = self._get_ips(server, 'floating')
-        assert floating_ips
+        if not ip:
+            if not proxy_cmd:
+                ip = self.get_ips(server, 'floating').keys()[0]
+            else:
+                ip = self.get_ips(server, 'fixed').keys()[0]
 
-        ssh_client = SshClient(floating_ips[0], pkey=keypair.private_key,
-                               username=username, password=password,
-                               timeout=ssh_timeout)
+        ssh_client = SshClient(ip, pkey=keypair.private_key, username=username,
+                               password=password, timeout=ssh_timeout,
+                               proxy_cmd=proxy_cmd)
 
         def predicate():
             try:
@@ -126,7 +129,7 @@ class ServerSteps(object):
         self._client.add_floating_ip(server, floating_ip)
 
         if check:
-            floating_ips = self._get_ips(server, 'floating')
+            floating_ips = self.get_ips(server, 'floating').keys()
             floating_ip.ip in floating_ips
 
     def detach_floating_ip(self, server, floating_ip, check=True):
@@ -134,14 +137,20 @@ class ServerSteps(object):
         self._client.remove_floating_ip(server, floating_ip)
 
         if check:
-            floating_ips = self._get_ips(server, 'floating')
+            floating_ips = self.get_ips(server, 'floating').keys()
             floating_ip.ip not in floating_ips
 
-    def _get_ips(self, server, ip_type):
-        ips = []
-        server.get()
-        for nets in server.addresses.values():
-            for net in nets:
-                if net['OS-EXT-IPS:type'] == ip_type:
-                    ips.append(net['addr'])
-        return ips
+    def get_ips(self, server, ip_type=None):
+        """Step to get server IPs."""
+        ips = {}
+        for net_name, net_info in server.addresses.items():
+            for net in net_info:
+                ips[net['addr']] = {'type': net['OS-EXT-IPS:type'],
+                                    'mac': net['OS-EXT-IPS-MAC:mac_addr'],
+                                    'net': net_name,
+                                    'ip': net['addr']}
+        if not ip_type:
+            return ips
+        else:
+            return {key: val for key, val in ips.items()
+                    if val['type'] == ip_type}

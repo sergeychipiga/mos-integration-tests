@@ -29,7 +29,7 @@ class SshClient(object):
     """SSH client."""
 
     def __init__(self, host, port=22, username=None, password=None, pkey=None,
-                 timeout=None):
+                 timeout=None, proxy_cmd=None):
         """Constructor."""
         self._host = host
         self._port = port
@@ -39,12 +39,17 @@ class SshClient(object):
         self._password = password
         self._ssh = paramiko.SSHClient()
         self._ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        self._proxy_cmd = proxy_cmd
 
     def connect(self):
         """Connect to ssh server."""
+        sock = paramiko.ProxyCommand(self._proxy_cmd) \
+            if self._proxy_cmd else None
+
         self._ssh.connect(self._host, self._port, pkey=self._pkey,
                           timeout=self._timeout, banner_timeout=self._timeout,
-                          username=self._username, password=self._password)
+                          username=self._username, password=self._password,
+                          sock=sock)
 
     def close(self):
         """Close ssh connection."""
