@@ -64,13 +64,13 @@ class NeutronSteps(BaseSteps):
         else:
             raise LookupError("Network {!r} is absent".format(name))
 
-    def network_by_mac(self, mac):
-        return self._client.list_ports(mac_address=mac)['ports'][0]
+    def network_id_by_mac(self, mac):
+        return self._client.list_ports(
+            mac_address=mac)['ports'][0]['network_id']
 
-    def dhcp_server_ip_by_network(self, net_id, filter_attr='host',
-                                  is_alive=True):
+    def dhcp_host_by_network(self, net_id, filter_attr='host', is_alive=True):
         filter_fn = lambda x: x[filter_attr] if filter_attr else x
         result = self._client.list_dhcp_agent_hosting_networks(net_id)
         nodes = [filter_fn(node) for node in result['agents']
                  if node['alive'] == is_alive]
-        return nodes
+        return nodes[0]

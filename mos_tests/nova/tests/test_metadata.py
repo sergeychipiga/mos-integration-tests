@@ -32,13 +32,14 @@ def admin_ssh_key_path(env):
 def ssh_proxy_data(admin_ssh_key_path, neutron_steps, server_steps, env):
     """Fixture to get ssh proxy data of server."""
     def _ssh_proxy_data(server):
-        import ipdb; ipdb.set_trace()
         ip_info = server_steps.get_ips(server, 'fixed').values()[0]
         server_ip = ip_info['ip']
         server_mac = ip_info['mac']
-        net_id = neutron_steps.network_by_mac(server_mac)['network_id']
+        net_id = neutron_steps.network_id_by_mac(server_mac)
         dhcp_netns = "qdhcp-{}".format(net_id)
-        dhcp_server_ip = neutron_steps.dhcp_server_ip_by_network(net_id)
+        dhcp_host = neutron_steps.dhcp_host_by_network(net_id)
+        import ipdb; ipdb.set_trace()
+        dhcp_server_ip = env.find_node_by_fqdn(dhcp_host).data['ip']
         cmd = 'ssh -i {} root@{} ip netns exec {} netcat {} 22'.format(
             admin_ssh_key_path, dhcp_server_ip, dhcp_netns, server_ip)
 
