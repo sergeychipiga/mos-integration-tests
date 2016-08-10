@@ -118,13 +118,6 @@ def fuel_master_ip(request, env_name, snapshot_name):
     return fuel_ip
 
 
-@pytest.fixture
-def auth_url(fuel_master_ip):
-    fuel = get_fuel_client(fuel_master_ip)
-    env = fuel.get_last_created_cluster()
-    return 'http://{0}:5000/v2.0/'.format(env.get_primary_controller_ip())
-
-
 def revert_snapshot(env_name, snapshot_name):
     DevopsClient.revert_snapshot(env_name=env_name,
                                  snapshot_name=snapshot_name)

@@ -43,7 +43,6 @@ class SshClient(object):
 
     def connect(self):
         """Connect to ssh server."""
-        import ipdb; ipdb.set_trace()
         sock = paramiko.ProxyCommand(self._proxy_cmd) \
             if self._proxy_cmd else None
 

@@ -26,7 +26,8 @@ __all__ = [
     'create_server',
     'create_servers',
     'server',
-    'server_steps'
+    'server_steps',
+    'ssh_proxy_data'
 ]
 
 
@@ -72,3 +73,23 @@ def server(create_server, image):
     """Fixture to create server with default options before test."""
     server_name = next(generate_ids('server'))
     return create_server(server_name, image)
+
+
+@pytest.fixture
+def ssh_proxy_data(admin_ssh_key_path, ip_by_host,
+                   neutron_steps, server_steps):
+    """Fixture to get ssh proxy data of server."""
+    def _ssh_proxy_data(server):
+        ip_info = server_steps.get_ips(server, 'fixed').values()[0]
+        server_ip = ip_info['ip']
+        server_mac = ip_info['mac']
+        net_id = neutron_steps.network_id_by_mac(server_mac)
+        dhcp_netns = "qdhcp-{}".format(net_id)
+        dhcp_host = neutron_steps.dhcp_host_by_network(net_id)
+        dhcp_server_ip = ip_by_host(dhcp_host)
+        cmd = 'ssh -i {} root@{} ip netns exec {} netcat {} 22'.format(
+            admin_ssh_key_path, dhcp_server_ip, dhcp_netns, server_ip)
+
+        return cmd, server_ip
+
+    return _ssh_proxy_data
