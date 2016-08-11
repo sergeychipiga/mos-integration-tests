@@ -14,13 +14,16 @@
 
 from collections import namedtuple
 from distutils.spawn import find_executable
+import inspect
 import logging
 import os
+import re
 import uuid
 
 import pytest
 from six.moves import configparser
 
+from mos_tests.steps import STEPS
 from mos_tests.environment.devops_client import DevopsClient
 from mos_tests.environment.fuel_client import FuelClient
 from mos_tests.functions.common import gen_temp_file
@@ -37,11 +40,46 @@ from .nova.conftest import *  # noqa
 
 logger = logging.getLogger(__name__)
 
+REGEX_CALL = re.compile('\W*(\w+)\(')
 
 # Define pytest plugins to use
 pytest_plugins = ("plugins.incremental",
                   "plugins.testrail_id",
                   "plugins.fuel_snapshot")
+
+
+def pytest_collection_modifyitems(config, items):
+    """Hook to detect forbidden calls inside test."""
+    errors = []
+    for item in items:
+        fixtures = item.funcargnames
+        permitted_calles = STEPS + fixtures
+
+        test_name = item.function.__name__
+        file_name = inspect.getsourcefile(item.function)
+        source_lines = inspect.getsourcelines(item.function)[0]
+
+        while source_lines:
+            def_line = source_lines.pop(0).strip()
+            if def_line.startswith('def '):
+                break
+
+        for line in source_lines:
+            result = REGEX_CALL.search(line)
+            if not result:
+                continue
+
+            callable_name = result.group(1)
+            if callable_name not in permitted_calles:
+
+                error = 'Calling {!r} in test {!r} in file {!r}'.format(
+                    callable_name, test_name, file_name)
+                errors.append(error)
+
+    if errors:
+        raise SystemError(
+            "Only steps and fixtures must be called in test!\n{}".format(
+                '\n'.join(errors)))
 
 
 def pytest_addoption(parser):

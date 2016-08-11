@@ -18,7 +18,7 @@ Floating IP steps.
 # limitations under the License.
 
 from mos_tests.functions.common import wait
-from mos_tests.steps import BaseSteps
+from mos_tests.steps import BaseSteps, step
 
 __all__ = [
     'FloatingIpSteps'
@@ -28,6 +28,7 @@ __all__ = [
 class FloatingIpSteps(BaseSteps):
     """Floating IP steps."""
 
+    @step
     def create_floating_ip(self, check=True):
         """Step to create floating IP."""
         floating_ip_pools = self._client.floating_ip_pools.list()
@@ -41,6 +42,7 @@ class FloatingIpSteps(BaseSteps):
 
         return floating_ip
 
+    @step
     def delete_floating_ip(self, floating_ip, check=True):
         """Step to delete floating IP."""
         self._client.floating_ips.delete(floating_ip)
@@ -48,6 +50,7 @@ class FloatingIpSteps(BaseSteps):
         if check:
             self.check_floating_ip_presence(floating_ip, present=False)
 
+    @step
     def check_floating_ip_presence(self, floating_ip, present=True, timeout=0):
         """Verify step to check floating IP is present."""
         def predicate():

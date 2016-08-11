@@ -18,3 +18,11 @@ Glance fixtures package.
 # limitations under the License.
 
 from .glance import *  # noqa
+
+__all__ = [
+    'create_image',
+    'create_images',
+    'glance_client',
+    'glance_steps',
+    'ubuntu_image'
+]

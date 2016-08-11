@@ -17,6 +17,20 @@ Base steps.
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+__all__ = [
+    'BaseSteps',
+    'step',
+    'STEPS'
+]
+
+STEPS = []
+
+
+def step(func):
+    """Decorator to append step name to storage."""
+    STEPS.append(func.__name__)
+    return func
+
 
 class BaseSteps(object):
     """Base steps."""

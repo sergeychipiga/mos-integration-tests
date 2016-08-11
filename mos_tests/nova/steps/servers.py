@@ -19,19 +19,17 @@ Server steps.
 
 from mos_tests.functions.common import wait
 from mos_tests.ssh import SshClient
+from mos_tests.steps import BaseSteps, step
 
 __all__ = [
     'ServerSteps'
 ]
 
 
-class ServerSteps(object):
+class ServerSteps(BaseSteps):
     """Nova steps."""
 
-    def __init__(self, client):
-        """Constructor."""
-        self._client = client
-
+    @step
     def create_server(self, server_name, image, flavor, network, keypair,
                       security_groups=None, availability_zone='nova',
                       check=True):
@@ -49,6 +47,7 @@ class ServerSteps(object):
 
         return server
 
+    @step
     def create_servers(self, server_names, image, flavor, network, keypair,
                        security_groups=None, availability_zone='nova',
                        check=True):
@@ -66,6 +65,7 @@ class ServerSteps(object):
 
         return servers
 
+    @step
     def delete_server(self, server, check=True):
         """Step to delete server."""
         server.force_delete()
@@ -73,6 +73,7 @@ class ServerSteps(object):
         if check:
             self.check_server_presence(server, present=False, timeout=180)
 
+    @step
     def delete_servers(self, servers, check=True):
         """Step to delete servers."""
         for server in servers:
@@ -82,6 +83,7 @@ class ServerSteps(object):
             for server in servers:
                 self.check_server_presence(server, present=False, timeout=180)
 
+    @step
     def check_server_presence(self, server, present=True, timeout=0):
         """Verify step to check server is present."""
         def predicate():
@@ -93,14 +95,19 @@ class ServerSteps(object):
 
         wait(predicate, timeout_seconds=timeout)
 
+    @step
     def check_server_status(self, server, status, timeout=0):
         """Verify step to check server status."""
+        transit_statuses = ('build',)
+
         def predicate():
             server.get()
-            return server.status.lower() == status.lower()
+            return server.status.lower() not in transit_statuses
 
         wait(predicate, timeout_seconds=timeout)
+        assert server.status.lower() == status.lower()
 
+    @step
     def check_ssh_connect(self, server, keypair, username=None, password=None,
                           ip=None, proxy_cmd=None, ssh_timeout=60, timeout=0):
         """Verify step to check ssh connect to server."""
@@ -124,6 +131,7 @@ class ServerSteps(object):
 
         wait(predicate, timeout_seconds=timeout)
 
+    @step
     def attach_floating_ip(self, server, floating_ip, check=True):
         """Step to attach floating IP to server."""
         self._client.add_floating_ip(server, floating_ip)
@@ -132,6 +140,7 @@ class ServerSteps(object):
             floating_ips = self.get_ips(server, 'floating').keys()
             floating_ip.ip in floating_ips
 
+    @step
     def detach_floating_ip(self, server, floating_ip, check=True):
         """Step to detach floating IP from server."""
         self._client.remove_floating_ip(server, floating_ip)
@@ -140,6 +149,7 @@ class ServerSteps(object):
             floating_ips = self.get_ips(server, 'floating').keys()
             floating_ip.ip not in floating_ips
 
+    @step
     def get_ips(self, server, ip_type=None):
         """Step to get server IPs."""
         ips = {}

@@ -18,7 +18,7 @@ Glance steps.
 # limitations under the License.
 
 from mos_tests.functions.common import wait
-from mos_tests.steps import BaseSteps
+from mos_tests.steps import BaseSteps, step
 
 __all__ = [
     'GlanceSteps'
@@ -28,6 +28,7 @@ __all__ = [
 class GlanceSteps(BaseSteps):
     """Glance steps."""
 
+    @step
     def create_image(self, image_name, image_path, disk_format='qcow2',
                      container_format='bare', check=True):
         """Step to create image."""
@@ -40,6 +41,7 @@ class GlanceSteps(BaseSteps):
 
         return image
 
+    @step
     def delete_image(self, image, check=True):
         """Step to delete image."""
         self._client.delete(image.id)
@@ -47,6 +49,7 @@ class GlanceSteps(BaseSteps):
         if check:
             self.check_image_presence(image, present=False, timeout=180)
 
+    @step
     def create_images(self, image_names, image_path, disk_format='qcow2',
                       container_format='bare', check=True):
         """Step to create images."""
@@ -62,6 +65,7 @@ class GlanceSteps(BaseSteps):
 
         return images
 
+    @step
     def delete_images(self, images, check=True):
         """Step to delete images."""
         for image in images:
@@ -71,6 +75,7 @@ class GlanceSteps(BaseSteps):
             for image in images:
                 self.check_image_presence(image, present=False, timeout=180)
 
+    @step
     def check_image_presence(self, image, present=True, timeout=0):
         """Verify step to check image is present."""
         def predicate():
@@ -82,6 +87,7 @@ class GlanceSteps(BaseSteps):
 
         wait(predicate, timeout_seconds=timeout)
 
+    @step
     def check_image_status(self, image, status, timeout=0):
         """Verify step to check image status."""
         def predicate():

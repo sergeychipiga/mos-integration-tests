@@ -18,3 +18,7 @@ Glance steps package.
 # limitations under the License.
 
 from .glance import *  # noqa
+
+__all__ = [
+    'GlanceSteps'
+]

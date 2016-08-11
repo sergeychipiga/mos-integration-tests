@@ -18,7 +18,7 @@ Neutron steps.
 # limitations under the License.
 
 from mos_tests.functions.common import wait
-from mos_tests.steps import BaseSteps
+from mos_tests.steps import BaseSteps, step
 
 __all__ = [
     "NeutronSteps"
@@ -28,6 +28,7 @@ __all__ = [
 class NeutronSteps(BaseSteps):
     """Neutron steps."""
 
+    @step
     def create_network(self, network_name, check=True):
         """Step to create network."""
         network = self._client.create(network_name)['network']
@@ -37,6 +38,7 @@ class NeutronSteps(BaseSteps):
 
         return network
 
+    @step
     def delete_network(self, network, check=True):
         """Step to delete network."""
         self._client.delete(network['id'])
@@ -44,6 +46,7 @@ class NeutronSteps(BaseSteps):
         if check:
             self.check_network_presence(network, present=False)
 
+    @step
     def check_network_presence(self, network, present=True, timeout=0):
         """Verify step to check network is present."""
         def predicate():
@@ -55,6 +58,7 @@ class NeutronSteps(BaseSteps):
 
         wait(predicate, timeout_seconds=timeout)
 
+    @step
     def find(self, name):
         """Step to find network."""
         networks = self._client.list_networks()['networks']
@@ -64,11 +68,15 @@ class NeutronSteps(BaseSteps):
         else:
             raise LookupError("Network {!r} is absent".format(name))
 
+    @step
     def network_id_by_mac(self, mac):
+        """Step to get network ID by server MAC."""
         return self._client.list_ports(
             mac_address=mac)['ports'][0]['network_id']
 
+    @step
     def dhcp_host_by_network(self, net_id, filter_attr='host', is_alive=True):
+        """Step to get DHCP host name by network ID."""
         filter_fn = lambda x: x[filter_attr] if filter_attr else x
         result = self._client.list_dhcp_agent_hosting_networks(net_id)
         nodes = [filter_fn(node) for node in result['agents']

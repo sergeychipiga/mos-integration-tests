@@ -18,7 +18,7 @@ Security group steps.
 # limitations under the License.
 
 from mos_tests.functions.common import wait
-from mos_tests.steps import BaseSteps
+from mos_tests.steps import BaseSteps, step
 
 __all__ = [
     'SecurityGroupSteps'
@@ -28,6 +28,7 @@ __all__ = [
 class SecurityGroupSteps(BaseSteps):
     """Security group steps."""
 
+    @step
     def create_group(self, group_name, description='', check=True):
         """Step to create security group."""
         group = self._client.security_groups.create(group_name, description)
@@ -37,11 +38,13 @@ class SecurityGroupSteps(BaseSteps):
 
         return group
 
+    @step
     def add_group_rules(self, group, rules):
         """Step to add rules to security group."""
         for rule in rules:
             self._client.security_group_rules.create(group.id, **rule)
 
+    @step
     def delete_group(self, group, check=True):
         """Step to delete security group."""
         self._client.security_groups.delete(group)
@@ -49,6 +52,7 @@ class SecurityGroupSteps(BaseSteps):
         if check:
             self.check_group_presence(group, present=False)
 
+    @step
     def check_group_presence(self, group, present=True, timeout=0):
         """Verify step to check security group is present."""
         def predicate():

@@ -35,7 +35,7 @@ def test_metadata_reach_all_booted_vm(security_group, nova_floating_ip,
         2. Boot an server based on previously created image
         3. Check that this server is reachable via ssh connection
         4. Delete server
-        5. Repeat pp 2-4 100 times (TODO(schipiga): like like a magic number)
+        5. Repeat pp 2-4 100 times (TODO (schipiga): like like a magic number)
     """
     flavor = flavor_steps.find(name='m1.small')
     network = neutron_steps.find(name='admin_internal_net')

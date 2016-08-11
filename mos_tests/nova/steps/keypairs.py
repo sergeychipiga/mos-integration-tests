@@ -18,7 +18,7 @@ Keypair steps.
 # limitations under the License.
 
 from mos_tests.functions.common import wait
-from mos_tests.steps import BaseSteps
+from mos_tests.steps import BaseSteps, step
 
 __all__ = [
     'KeypairSteps'
@@ -28,6 +28,7 @@ __all__ = [
 class KeypairSteps(BaseSteps):
     """Keypair steps."""
 
+    @step
     def create_keypair(self, keypair_name, check=True):
         """Step to create keypair."""
         keypair = self._client.create(keypair_name)
@@ -37,6 +38,7 @@ class KeypairSteps(BaseSteps):
 
         return keypair
 
+    @step
     def delete_keypair(self, keypair, check=True):
         """Step to delete keypair."""
         self._client.delete(keypair.id)
@@ -44,6 +46,7 @@ class KeypairSteps(BaseSteps):
         if check:
             self.check_keypair_presence(keypair, present=False)
 
+    @step
     def check_keypair_presence(self, keypair, present=True, timeout=0):
         """Verify step to check keypair is present."""
         def predicate():

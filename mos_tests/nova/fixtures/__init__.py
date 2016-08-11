@@ -23,3 +23,29 @@ from .keypairs import *  # noqa
 from .nova import *  # noqa
 from .servers import *  # noqa
 from .security_groups import *  # noqa
+
+__all__ = [
+    'create_flavor',
+    'flavor',
+    'flavor_steps',
+
+    'nova_create_floating_ip',
+    'nova_floating_ip',
+    'nova_floating_ip_steps',
+
+    'create_keypair',
+    'keypair',
+    'keypair_steps',
+
+    'nova_client',
+
+    'create_security_group',
+    'security_group',
+    'security_group_steps',
+
+    'create_server',
+    'create_servers',
+    'server',
+    'server_steps',
+    'ssh_proxy_data'
+]

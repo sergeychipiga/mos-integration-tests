@@ -21,7 +21,10 @@ import os
 import tempfile
 import uuid
 
+from mos_tests.steps import step
 
+
+@step
 def generate_ids(prefix=None, postfix=None, count=1, length=None):
     """Generate unique identificators, based on uuid.
 
@@ -45,6 +48,7 @@ def generate_ids(prefix=None, postfix=None, count=1, length=None):
         yield uid
 
 
+@step
 def generate_files(prefix=None, postfix=None, folder=None, count=1, size=1024):
     """Generate files with unique names.
 
